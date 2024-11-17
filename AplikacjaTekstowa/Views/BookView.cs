@@ -40,14 +40,24 @@ namespace AplikacjaTekstowa.Views
 
         public Book PromptForBookDetails()
         {
-            string title = GetInput("Podaj tytuł: ");
-            string author = GetInput("Podaj autora: ");
-            string genre = GetInput("Podaj gatunek: ");
-            int pageCount = int.Parse(GetInput("Podaj ilość stron: "));
-            int year = int.Parse(GetInput("Podaj rok wydania: "));
-            string description = GetInput("Podaj opis: ");
-            return new Book { Title = title, Author = author, Genre = genre, PageCount = pageCount, Year = year, Description = description };
+            string title = GetValidatedStringInput("Podaj tytuł: ");
+            string author = GetValidatedStringInput("Podaj autora: ");
+            string genre = GetValidatedStringInput("Podaj gatunek: ");
+            int pageCount = GetValidatedIntInput("Podaj ilość stron: ");
+            int year = GetValidatedIntInput("Podaj rok wydania: ");
+            string description = GetValidatedStringInput("Podaj opis: ");
+
+            return new Book
+            {
+                Title = title,
+                Author = author,
+                Genre = genre,
+                PageCount = pageCount,
+                Year = year,
+                Description = description
+            };
         }
+
         public int DisplayMenuWithNavigation()
         {
             string[] menuOptions = {
@@ -264,6 +274,8 @@ namespace AplikacjaTekstowa.Views
                 {
                     // Wyświetla szczegóły wybranej książki
                     DisplayBookDetails(books[selectedIndex]);
+                    Console.WriteLine("\nNaciśnij dowolny klawisz, aby wrócić do listy książek...");
+                    Console.ReadKey(); 
                 }
                 break;
         }
@@ -349,6 +361,7 @@ public Book PromptForBookDetailsInteractive()
     string[] fields = { "Tytuł", "Autor", "Gatunek", "Liczba stron", "Rok wydania", "Opis" };
     string[] values = new string[fields.Length];
     int selectedIndex = 0;
+    bool isAdding = false;
 
     while (true)
     {
@@ -361,14 +374,27 @@ public Book PromptForBookDetailsInteractive()
                 Console.BackgroundColor = ConsoleColor.DarkBlue;
                 Console.ForegroundColor = ConsoleColor.White;
             }
-
             string displayValue = string.IsNullOrEmpty(values[i]) ? "(puste)" : values[i];
             Console.WriteLine($"{fields[i]}: {displayValue}");
             Console.ResetColor();
         }
 
-        Console.WriteLine("\nUżyj strzałek do poruszania się po polach, Enter, aby edytować, lub F2, aby zakończyć.");
+        Console.WriteLine("\nUżyj strzałek do poruszania się po polach, Enter, aby edytować.\nWybierz opcję poniżej:");
 
+        // Wyświetlanie opcji "Dodaj" i "Anuluj"
+        Console.WriteLine("\nOpcje:");
+        if (isAdding)
+        {
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("[ Dodaj ]      Anuluj");
+            Console.ResetColor();
+        }
+        else
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("Dodaj       [ Anuluj ]");
+            Console.ResetColor();
+        }
         var key = Console.ReadKey(true).Key;
 
         switch (key)
@@ -380,36 +406,111 @@ public Book PromptForBookDetailsInteractive()
             case ConsoleKey.DownArrow:
                 selectedIndex = (selectedIndex == fields.Length - 1) ? 0 : selectedIndex + 1;
                 break;
-
-            case ConsoleKey.Enter:
-                Console.Clear();
-                Console.Write($"{fields[selectedIndex]}: ");
-                values[selectedIndex] = Console.ReadLine();
+            
+            case ConsoleKey.LeftArrow:
+                isAdding = false; // Przełącz na "Anuluj"
                 break;
 
-            case ConsoleKey.F2:
-                // Sprawdzenie, czy wszystkie pola są uzupełnione
-                if (values.Any(string.IsNullOrEmpty))
+            case ConsoleKey.RightArrow:
+                isAdding = true; // Przełącz na "Dodaj"
+                break;
+
+  case ConsoleKey.Enter:
+                if (selectedIndex < fields.Length) // Edytowanie pola
                 {
-                    Console.WriteLine("Nie wszystkie pola zostały uzupełnione. Uzupełnij je przed zakończeniem.");
-                    Console.ReadKey();
-                }
-                else
-                {
-                    return new Book
+                    Console.Clear();
+                    Console.Write($"{fields[selectedIndex]}: ");
+                    if (selectedIndex == 1 || selectedIndex == 2) // Autor i Gatunek
                     {
-                        Title = values[0],
-                        Author = values[1],
-                        Genre = values[2],
-                        PageCount = int.Parse(values[3]),
-                        Year = int.Parse(values[4]),
-                        Description = values[5]
-                    };
+                        values[selectedIndex] = GetValidatedStringInput($"Podaj wartość dla {fields[selectedIndex]}: ", true);
+                    }
+                    else if (selectedIndex == 3 || selectedIndex == 4) // Liczba stron i Rok wydania
+                    {
+                        values[selectedIndex] = GetValidatedIntInput($"Podaj wartość dla {fields[selectedIndex]}: ").ToString();
+                    }
+                    else // Tytuł i Opis
+                    {
+                        values[selectedIndex] = GetValidatedStringInput($"Podaj wartość dla {fields[selectedIndex]}: ");
+                    }
+                }
+                else // Jeśli wybrano "Dodaj" lub "Anuluj"
+                {
+                    if (isAdding)
+                    {
+                        // Sprawdzenie, czy wszystkie pola są uzupełnione
+                        if (values.Any(string.IsNullOrEmpty))
+                        {
+                            Console.WriteLine("Nie wszystkie pola zostały uzupełnione. Uzupełnij je przed zakończeniem.");
+                            Console.ReadKey();
+                        }
+                        else
+                        {
+                            return new Book
+                            {
+                                Title = values[0],
+                                Author = values[1],
+                                Genre = values[2],
+                                PageCount = int.Parse(values[3]),
+                                Year = int.Parse(values[4]),
+                                Description = values[5]
+                            };
+                        }
+                    }
+                    else
+                    {
+                        // Anulowanie dodawania książki
+                        Console.WriteLine("Dodawanie książki zostało anulowane.");
+                        return null;
+                    }
                 }
                 break;
         }
     }
+}          
+
+          
+           
+
+
+public string GetValidatedStringInput(string prompt, bool allowOnlyLetters = false)
+{
+    while (true)
+    {
+        Console.Write(prompt);
+        string input = Console.ReadLine();
+
+        if (string.IsNullOrWhiteSpace(input))
+        {
+            Console.WriteLine("Pole nie może być puste. Spróbuj ponownie.");
+            continue;
+        }
+
+        if (allowOnlyLetters && !input.All(char.IsLetter))
+        {
+            Console.WriteLine("Dozwolone są tylko litery. Spróbuj ponownie.");
+            continue;
+        }
+
+        return input;
+    }
 }
+
+public int GetValidatedIntInput(string prompt)
+{
+    while (true)
+    {
+        Console.Write(prompt);
+        string input = Console.ReadLine();
+
+        if (int.TryParse(input, out int value) && value > 0)
+        {
+            return value;
+        }
+
+        Console.WriteLine("Podano nieprawidłową wartość. Wprowadź liczbę całkowitą większą od 0.");
+    }
+}
+
 
 
 public Book EditBookDetailsInteractive(Book bookToEdit)
@@ -459,12 +560,21 @@ public Book EditBookDetailsInteractive(Book bookToEdit)
 
             case ConsoleKey.Enter:
                 Console.Clear();
-                Console.Write($"{fields[selectedIndex]}: ");
-                values[selectedIndex] = Console.ReadLine();
+                if (selectedIndex == 1 || selectedIndex == 2) // Autor i Gatunek
+                {
+                    values[selectedIndex] = GetValidatedStringInput($"Podaj wartość dla {fields[selectedIndex]}: ", true);
+                }
+                else if (selectedIndex == 3 || selectedIndex == 4) // Liczba stron i Rok wydania
+                {
+                    values[selectedIndex] = GetValidatedIntInput($"Podaj wartość dla {fields[selectedIndex]}: ").ToString();
+                }
+                else // Tytuł i Opis
+                {
+                    values[selectedIndex] = GetValidatedStringInput($"Podaj wartość dla {fields[selectedIndex]}: ");
+                }
                 break;
 
-            case ConsoleKey.F2:
-                // Sprawdzenie, czy wszystkie pola są poprawne
+            case ConsoleKey.F2: // zakonczenie edytowania
                 if (values.Any(string.IsNullOrEmpty))
                 {
                     Console.WriteLine("Nie wszystkie pola zostały uzupełnione. Uzupełnij je przed zakończeniem edycji.");
@@ -499,9 +609,12 @@ public Book EditBookDetailsInteractive(Book bookToEdit)
             Console.WriteLine($"Rok wydania:  {book.Year}");
             Console.WriteLine($"Opis:         {book.Description}\n");
             Console.WriteLine("=========================");
-            return ConfirmAction("Czy chcesz edytować tę książkę?");
+           // Console.ReadKey();
+        }
 
-            Console.ReadKey();
+        public bool AskToEditBook()
+        {
+            return ConfirmAction(("Czy chcesz edytować tę książkę?"));
         }
 
     }

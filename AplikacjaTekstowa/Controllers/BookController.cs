@@ -39,10 +39,18 @@ namespace AplikacjaTekstowa.Controllers
                     case 3:
                         string author = view.GetInput("Podaj autora: ");
                         List<Book> booksByAuthor = repository.SearchByAuthor(author);
-                        view.DisplayBooksWithDetailsOption(booksByAuthor);
+                        if (booksByAuthor.Count == 0)
+                        {
+                            Console.WriteLine("Nie znaleziono autora o podanej nazwie.");
+                        }
+                        else
+                        {
+                            view.DisplayBooksWithDetailsOption(booksByAuthor);
+                        }
                         break;
                     case 4:
                         var newBook = view.PromptForBookDetailsInteractive();
+                        if (newBook == null) break; // Sprawdzenie, czy anulowano
                         var existingBook = repository.GetBooks()
                             .Find(b => b.Title.Equals(newBook.Title, StringComparison.OrdinalIgnoreCase) &&
                                        b.Author.Equals(newBook.Author, StringComparison.OrdinalIgnoreCase) &&
@@ -93,12 +101,15 @@ namespace AplikacjaTekstowa.Controllers
 
                         if (bookToEdit != null)
                         {
-                            // Wyświetlenie szczegółów książki i pytanie o edycję
-                            if (view.DisplayBookDetails(bookToEdit))
+                            // Wyświetlenie szczegółów książki
+                            view.DisplayBookDetails(bookToEdit);
+
+                            // Zapytanie o edycję
+                            if (view.AskToEditBook())
                             {
                                 var updatedBook = view.EditBookDetailsInteractive(bookToEdit);
                                 repository.UpdateBook(bookToEdit, updatedBook);
-                                Console.WriteLine($"\nKsiążka \"{updatedBook.Title}\" autorstwa {updatedBook.Author} została pomyślnie zaktualizowana i zapisana.");
+                                Console.WriteLine($"\nKsiążka \"{updatedBook.Title}\" autorstwa {updatedBook.Author} została pomyślnie zaktualizowana.");
                             }
                             else
                             {
@@ -107,7 +118,20 @@ namespace AplikacjaTekstowa.Controllers
                         }
                         else
                         {
-                            Console.WriteLine("Nie znaleziono książki o podanym tytule.");
+                            bool addNew = view.ConfirmAction("Nie znaleziono książki o podanym tytule. Czy chcesz ją dodać?");
+                            if (addNew)
+                            {
+                                var additionalBook = view.PromptForBookDetailsInteractive();
+                                if (additionalBook != null) // Sprawdzenie anulowania
+                                {
+                                    repository.AddBook(additionalBook);
+                                    Console.WriteLine("Dodano nową książkę.");
+                                }
+                            }
+                            else
+                            {
+                                Console.WriteLine("Powrót do menu.");
+                            }
                         }
                         break;
 
@@ -116,7 +140,7 @@ namespace AplikacjaTekstowa.Controllers
                         Console.WriteLine("Wyjście z aplikacji.");
                         running = false;
                         return;
-                    case 8:
+                  /*  case 8:
                         Console.WriteLine("Sortowanie...");
                         int sortChoice = view.DisplaySortOptions();
                         List<Book> sortedBooks = ApplySort(sortChoice, repository.GetBooks());
@@ -128,9 +152,8 @@ namespace AplikacjaTekstowa.Controllers
                         view.DisplayBooks(filteredBooks);                        break;
                     case 10:
                         Console.WriteLine("Wyświetlanie szczegółów...");
-                        // Dodaj logikę wyświetlania szczegółów, jeśli potrzebujesz
                         break;
-                   
+                   */
                     default:
                         Console.WriteLine("Nieprawidłowa opcja.");
                         break;

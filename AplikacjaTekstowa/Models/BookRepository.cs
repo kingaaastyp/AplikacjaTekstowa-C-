@@ -19,25 +19,30 @@ namespace AplikacjaTekstowa
 
         private List<Book> LoadBooksFromFile()
         {
-            if (!File.Exists(filePath)) return new List<Book>();
-            string json = File.ReadAllText(filePath);
-            return JsonSerializer.Deserialize<List<Book>>(json) ?? new List<Book>();
+            try
+            {
+                if (!File.Exists(filePath)) return new List<Book>();
+                string json = File.ReadAllText(filePath);
+                return JsonSerializer.Deserialize<List<Book>>(json) ?? new List<Book>();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Błąd podczas ładowania pliku: {ex.Message}");
+                return new List<Book>();
+            }
         }
 
         public void SaveBooksToFile()
         {
             try
             {
-                Console.WriteLine($"Zapisuję książki do pliku: {Path.GetFullPath(filePath)}"); // Ścieżka pełna
-
                 string json = JsonSerializer.Serialize(books, new JsonSerializerOptions { WriteIndented = true });
                 File.WriteAllText(filePath, json);
 
-                Console.WriteLine("Zapisano książki do pliku.");
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine($"Błąd podczas zapisu pliku: {ex.Message}");
             }
 
         }
@@ -67,11 +72,12 @@ namespace AplikacjaTekstowa
         }
 
         public List<Book> SearchByTitle(string title) =>
-            books.Where(b => b.Title.Contains(title, StringComparison.OrdinalIgnoreCase)).ToList();
+            books.Where(b => b.Title.Equals(title, StringComparison.OrdinalIgnoreCase)).ToList();
 
-        public List<Book> SearchByAuthor(string author) =>
-            books.Where(b => b.Author.Contains(author, StringComparison.OrdinalIgnoreCase)).ToList();
-
+        public List<Book> SearchByAuthor(string author) 
+        {
+            return books.Where(b => b.Author.Equals(author, StringComparison.OrdinalIgnoreCase)).ToList();
+        }
         public List<Book> FilterByAuthor(string author)
         {
             return books.Where(b => b.Author.Equals(author, StringComparison.OrdinalIgnoreCase)).ToList();

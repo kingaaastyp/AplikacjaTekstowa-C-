@@ -16,3 +16,4 @@ C:\Users\kstyp\RiderProjects\AplikacjaTekstowa\AplikacjaTekstowa\obj\Debug\net8.
 C:\Users\kstyp\RiderProjects\AplikacjaTekstowa\AplikacjaTekstowa\obj\Debug\net8.0\AplikacjaTekstowa.genruntimeconfig.cache
 C:\Users\kstyp\RiderProjects\AplikacjaTekstowa\AplikacjaTekstowa\obj\Debug\net8.0\ref\AplikacjaTekstowa.dll
 C:\Users\kstyp\RiderProjects\AplikacjaTekstowa\AplikacjaTekstowa\bin\Debug\net8.0\books.json
+C:\Users\kstyp\RiderProjects\AplikacjaTekstowa\AplikacjaTekstowa\obj\Debug\net8.0\AplikacjaTekstowa.sourcelink.json
