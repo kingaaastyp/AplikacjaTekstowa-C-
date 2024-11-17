@@ -6,16 +6,20 @@ namespace AplikacjaTekstowa.Views
 {
     public class BookView
     {
-        public void DisplayMenu()
+        
+        public void DisplayHeader()
         {
-            Console.WriteLine("\n=== Menu ===");
-            Console.WriteLine("1. Wyświetl wszystkie książki");
-            Console.WriteLine("2. Wyszukaj książkę po tytule");
-            Console.WriteLine("3. Wyszukaj książkę po autorze");
-            Console.WriteLine("4. Dodaj nową książkę");
-            Console.WriteLine("5. Usuń książkę");
-            Console.WriteLine("6. Edytuj książkę");
-            Console.WriteLine("7. Wyjdź");
+            Console.Clear();
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine(@"
+   █████╗ ██╗     ██╗   ██╗██████╗ ███╗   ███╗      ██╗  ██╗███████╗██╗ ██████╗ ███████╗██╗  ██╗
+  ██╔══██╗██║     ██║   ██║██╔══██╗████╗ ████║      ██║  ██║██╔════╝██║██╔════╝ ██╔════╝██║ ██╔╝
+  ███████║██║     ██║   ██║██████╔╝██╔████╔██║█████╗███████║███████╗██║██║  ███╗█████╗  █████╔╝ 
+  ██╔══██║██║     ██║   ██║██╔═══╝ ██║╚██╔╝██║╚════╝██╔══██║╚════██║██║██║   ██║██╔══╝  ██╔═██╗ 
+  ██║  ██║███████╗╚██████╔╝██║     ██║ ╚═╝ ██║      ██║  ██║███████║██║╚██████╔╝███████╗██║  ██╗
+  ╚═╝  ╚═╝╚══════╝ ╚═════╝ ╚═╝     ╚═╝     ╚═╝      ╚═╝  ╚═╝╚══════╝╚═╝ ╚═════╝ ╚══════╝╚═╝  ╚═╝
+            ");
+            Console.ResetColor();
         }
 
         public string GetInput(string prompt)
@@ -26,18 +30,55 @@ namespace AplikacjaTekstowa.Views
 
         public void DisplayBooks(List<Book> books)
         {
+            Console.Clear();
             if (books.Count == 0)
             {
+                Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("Brak książek.");
+                Console.ResetColor();
+
                 return;
             }
 
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("\n=== Lista książek ===");
             foreach (var book in books)
             {
-                Console.WriteLine($"Tytuł: {book.Title}, Autor: {book.Author}");
+                Console.WriteLine("-----------------------------");
+                Console.WriteLine($"Tytuł: {book.Title}");
+                Console.WriteLine($"Autor: {book.Author}");
+                Console.WriteLine($"Gatunek: {book.Genre}");
+                Console.WriteLine($"Liczba stron: {book.PageCount}");
+                Console.WriteLine($"Rok wydania: {book.Year}");
+                Console.WriteLine($"Opis: {book.Description}");
+                Console.WriteLine("-----------------------------");
+                
             }
+            Console.ResetColor();
+
         }
 
+        public void ShowReturningAnimation(string message)
+        {
+            Console.Write($"{message} ");
+            for (int i = 0; i < 3; i++)
+            {
+                Console.Write(".");
+                System.Threading.Thread.Sleep(300);
+            }
+            Console.WriteLine("\n");
+        }
+
+        public void LoadingAnimation(string message)
+        {
+            Console.Write(message);
+            for (int i = 0; i < 3; i++)
+            {
+                Console.Write(".");
+                System.Threading.Thread.Sleep(500);
+            }
+            Console.WriteLine();
+        }
         public Book PromptForBookDetails()
         {
             string title = GetValidatedStringInput("Podaj tytuł: ");
@@ -62,12 +103,13 @@ namespace AplikacjaTekstowa.Views
         {
             string[] menuOptions = {
                 "1. Wyświetl wszystkie książki",
-                "2. Wyszukaj książki po tytule",
-                "3. Wyszukaj książki po autorze",
+                "2. Wyszukaj książkę po tytule",
+                "3. Wyszukaj książkę po autorze",
                 "4. Dodaj nową książkę",
                 "5. Usuń książkę",
                 "6. Edytuj książkę",
-                "7. Wyjdź"
+                "7. Wyjdź",
+                "\n============================"
             };
             int selectedOption = 0;
             bool selecting = true;
@@ -76,8 +118,9 @@ namespace AplikacjaTekstowa.Views
             {
                 Console.Clear();
 
-                Console.WriteLine("=== Menu ===");
-                for (int i = 0; i < menuOptions.Length; i++)
+                Console.WriteLine("\n============================");
+                Console.WriteLine("         MENU");
+                Console.WriteLine("============================\n");                for (int i = 0; i < menuOptions.Length; i++)
                 {
                     if (i == selectedOption)
                     {
@@ -354,22 +397,22 @@ public bool ConfirmAction(string message)
         }
     }
 }
-
-
 public Book PromptForBookDetailsInteractive()
 {
     string[] fields = { "Tytuł", "Autor", "Gatunek", "Liczba stron", "Rok wydania", "Opis" };
     string[] values = new string[fields.Length];
     int selectedIndex = 0;
-    bool isAdding = false;
+    bool isOnOptions = false; // Flaga do przełączania między polami i opcjami
 
     while (true)
     {
         Console.Clear();
         Console.WriteLine("=== Dodawanie nowej książki ===");
+
+        // Wyświetlanie pól do edycji
         for (int i = 0; i < fields.Length; i++)
         {
-            if (i == selectedIndex)
+            if (i == selectedIndex && !isOnOptions)
             {
                 Console.BackgroundColor = ConsoleColor.DarkBlue;
                 Console.ForegroundColor = ConsoleColor.White;
@@ -379,44 +422,89 @@ public Book PromptForBookDetailsInteractive()
             Console.ResetColor();
         }
 
-        Console.WriteLine("\nUżyj strzałek do poruszania się po polach, Enter, aby edytować.\nWybierz opcję poniżej:");
+        Console.WriteLine("\nNaciśniej tab, aby wybierać opcję poniżej (Użyj strzałek w lewo/prawo oraz Enter aby potwierdzić):");
 
-        // Wyświetlanie opcji "Dodaj" i "Anuluj"
-        Console.WriteLine("\nOpcje:");
-        if (isAdding)
+        // Wyświetlanie opcji "Anuluj" i "Dodaj"
+        if (isOnOptions && selectedIndex == fields.Length) // "Anuluj" zaznaczone
         {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("[ Dodaj ]      Anuluj");
+            Console.BackgroundColor = ConsoleColor.DarkBlue;
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.Write("[ Anuluj ]");
+            Console.ResetColor();
+            Console.Write("   Dodaj");
+        }
+        else if (isOnOptions && selectedIndex == fields.Length + 1) // "Dodaj" zaznaczone
+        {
+            Console.Write(" Anuluj   ");
+            Console.BackgroundColor = ConsoleColor.DarkBlue;
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.Write("[ Dodaj ]");
             Console.ResetColor();
         }
         else
         {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("Dodaj       [ Anuluj ]");
-            Console.ResetColor();
+            Console.Write(" Anuluj   Dodaj");
         }
+
+        Console.WriteLine();
+
         var key = Console.ReadKey(true).Key;
 
         switch (key)
         {
             case ConsoleKey.UpArrow:
-                selectedIndex = (selectedIndex == 0) ? fields.Length - 1 : selectedIndex - 1;
+                if (!isOnOptions) // Przesuwanie między polami
+                    selectedIndex = (selectedIndex == 0) ? fields.Length - 1 : selectedIndex - 1;
                 break;
 
             case ConsoleKey.DownArrow:
-                selectedIndex = (selectedIndex == fields.Length - 1) ? 0 : selectedIndex + 1;
+                if (!isOnOptions) // Przesuwanie między polami
+                    selectedIndex = (selectedIndex == fields.Length - 1) ? 0 : selectedIndex + 1;
                 break;
-            
+
             case ConsoleKey.LeftArrow:
-                isAdding = false; // Przełącz na "Anuluj"
+                if (isOnOptions)
+                    selectedIndex = fields.Length; // Zaznacz "Anuluj"
                 break;
 
             case ConsoleKey.RightArrow:
-                isAdding = true; // Przełącz na "Dodaj"
+                if (isOnOptions)
+                    selectedIndex = fields.Length + 1; // Zaznacz "Dodaj"
                 break;
 
-  case ConsoleKey.Enter:
-                if (selectedIndex < fields.Length) // Edytowanie pola
+            case ConsoleKey.Enter:
+                if (isOnOptions)
+                {
+                    if (selectedIndex == fields.Length) // Wybrano "Anuluj"
+                    {
+                        Console.WriteLine("Dodawanie książki zostało anulowane.");
+                        return null;
+                    }
+                    else if (selectedIndex == fields.Length + 1) // Wybrano "Dodaj"
+                    {
+                        // Sprawdzenie kompletności pól
+                        if (values.Any(string.IsNullOrEmpty))
+                        {
+                            Console.ForegroundColor = ConsoleColor.Red;
+                            Console.WriteLine("Nie wszystkie pola zostały uzupełnione. Uzupełnij je przed zakończeniem.");
+                            Console.ResetColor();
+                            Console.ReadKey();
+                        }
+                        else
+                        {
+                            return new Book
+                            {
+                                Title = values[0],
+                                Author = values[1],
+                                Genre = values[2],
+                                PageCount = int.Parse(values[3]),
+                                Year = int.Parse(values[4]),
+                                Description = values[5]
+                            };
+                        }
+                    }
+                }
+                else // Edytowanie pola
                 {
                     Console.Clear();
                     Console.Write($"{fields[selectedIndex]}: ");
@@ -433,40 +521,19 @@ public Book PromptForBookDetailsInteractive()
                         values[selectedIndex] = GetValidatedStringInput($"Podaj wartość dla {fields[selectedIndex]}: ");
                     }
                 }
-                else // Jeśli wybrano "Dodaj" lub "Anuluj"
-                {
-                    if (isAdding)
-                    {
-                        // Sprawdzenie, czy wszystkie pola są uzupełnione
-                        if (values.Any(string.IsNullOrEmpty))
-                        {
-                            Console.WriteLine("Nie wszystkie pola zostały uzupełnione. Uzupełnij je przed zakończeniem.");
-                            Console.ReadKey();
-                        }
-                        else
-                        {
-                            return new Book
-                            {
-                                Title = values[0],
-                                Author = values[1],
-                                Genre = values[2],
-                                PageCount = int.Parse(values[3]),
-                                Year = int.Parse(values[4]),
-                                Description = values[5]
-                            };
-                        }
-                    }
-                    else
-                    {
-                        // Anulowanie dodawania książki
-                        Console.WriteLine("Dodawanie książki zostało anulowane.");
-                        return null;
-                    }
-                }
+                break;
+
+            case ConsoleKey.Tab:
+                isOnOptions = !isOnOptions; // Przełącz na opcje "Dodaj/Anuluj"
+                selectedIndex = fields.Length; // Ustaw na "Anuluj"
+                break;
+
+            case ConsoleKey.Escape:
+                isOnOptions = false; // Powrót do edycji pól
                 break;
         }
     }
-}          
+}
 
           
            
@@ -601,15 +668,50 @@ public Book EditBookDetailsInteractive(Book bookToEdit)
         public void DisplayBookDetails(Book book)
         {
             Console.Clear();
-            Console.WriteLine("=== Szczegóły Książki ===\n");
-            Console.WriteLine($"Tytuł:        {book.Title}");
-            Console.WriteLine($"Autor:        {book.Author}");
-            Console.WriteLine($"Gatunek:      {book.Genre}");
-            Console.WriteLine($"Liczba stron: {book.PageCount}");
-            Console.WriteLine($"Rok wydania:  {book.Year}");
-            Console.WriteLine($"Opis:         {book.Description}\n");
-            Console.WriteLine("=========================");
-           // Console.ReadKey();
+            Console.ForegroundColor = ConsoleColor.DarkCyan;
+            Console.WriteLine("═══════════════════════════════════════════════════════════════════");
+            Console.WriteLine($"                       Szczegóły Książki                        ");
+            Console.WriteLine("═══════════════════════════════════════════════════════════════════");
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.Write("Tytuł: ");
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine(book.Title);
+
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.Write("Autor: ");
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine(book.Author);
+
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.Write("Gatunek: ");
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine(book.Genre);
+
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.Write("Liczba stron: ");
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine(book.PageCount);
+
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.Write("Rok wydania: ");
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine(book.Year);
+
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.Write("Opis: ");
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine(book.Description);
+
+            // Stopka
+            Console.ForegroundColor = ConsoleColor.DarkCyan;
+            Console.WriteLine("═══════════════════════════════════════════════════════════════════");
+            Console.ResetColor();
+
+            // Informacja o powrocie
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.WriteLine("\nNaciśnij dowolny klawisz, aby wrócić do listy książek...");
+            Console.ResetColor();
+            Console.ReadKey();
         }
 
         public bool AskToEditBook()

@@ -22,7 +22,7 @@ namespace AplikacjaTekstowa.Controllers
 
             while (running)
             {
-                Console.Clear();
+                view.DisplayHeader(); 
                 int choice = view.DisplayMenuWithNavigation();
 
                 switch (choice)
@@ -30,11 +30,14 @@ namespace AplikacjaTekstowa.Controllers
                     case 1:
                         List<Book> allBooks = repository.GetBooks();
                         view.DisplayBooksWithDetailsOption(allBooks); 
+                        view.ShowReturningAnimation("Powrót do menu");
                         break;
                     case 2:
                         string title = view.GetInput("Podaj tytuł: ");
                         List<Book> booksByTitle = repository.SearchByTitle(title);
                         view.DisplayBooksWithDetailsOption(booksByTitle);
+                        view.ShowReturningAnimation("Powrót do menu");
+
                         break;
                     case 3:
                         string author = view.GetInput("Podaj autora: ");
@@ -47,6 +50,8 @@ namespace AplikacjaTekstowa.Controllers
                         {
                             view.DisplayBooksWithDetailsOption(booksByAuthor);
                         }
+                        view.ShowReturningAnimation("Powrót do menu");
+
                         break;
                     case 4:
                         var newBook = view.PromptForBookDetailsInteractive();
@@ -68,6 +73,7 @@ namespace AplikacjaTekstowa.Controllers
                             repository.AddBook(newBook);
                             Console.WriteLine("Dodano książkę.");
                         }
+                        view.ShowReturningAnimation("Powrót do menu");
                         break;
                     case 5:
                         string titleToRemove = view.GetInput("Podaj tytuł książki do usunięcia: ");
@@ -92,6 +98,7 @@ namespace AplikacjaTekstowa.Controllers
                         {
                             Console.WriteLine("Nie znaleziono książki o podanym tytule i autorze.");
                         }
+                        view.ShowReturningAnimation("Powrót do menu");
                         break;
                   
                     case 6: // Edytowanie książki
@@ -133,6 +140,8 @@ namespace AplikacjaTekstowa.Controllers
                                 Console.WriteLine("Powrót do menu.");
                             }
                         }
+                        view.ShowReturningAnimation("Powrót do menu");
+
                         break;
 
                     
@@ -140,20 +149,7 @@ namespace AplikacjaTekstowa.Controllers
                         Console.WriteLine("Wyjście z aplikacji.");
                         running = false;
                         return;
-                  /*  case 8:
-                        Console.WriteLine("Sortowanie...");
-                        int sortChoice = view.DisplaySortOptions();
-                        List<Book> sortedBooks = ApplySort(sortChoice, repository.GetBooks());
-                        view.DisplayBooks(sortedBooks);                        break;
-                    case 9:
-                        Console.WriteLine("Filtracja...");
-                        int filterChoice = view.DisplayFilterOptions();
-                        List<Book> filteredBooks = ApplyFilter(filterChoice);
-                        view.DisplayBooks(filteredBooks);                        break;
-                    case 10:
-                        Console.WriteLine("Wyświetlanie szczegółów...");
-                        break;
-                   */
+                 
                     default:
                         Console.WriteLine("Nieprawidłowa opcja.");
                         break;
